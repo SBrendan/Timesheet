@@ -5,16 +5,13 @@ import {
   AlertTitle,
   Box,
   Button,
-  Checkbox,
   CloseButton,
   Flex,
   FormControl,
   FormLabel,
   Heading,
   Input,
-  Link,
   Stack,
-  Text,
   useToast
 } from "@chakra-ui/react";
 import * as React from "react";
@@ -23,9 +20,12 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/authContext";
 import authService from "../services/auth.service";
 
-interface Props {}
-
-const Login: React.FC<Props> = (props: Props) => {
+interface ResetPasswordModalProps {
+  email?: string;
+}
+const ResetPassword: React.FC<ResetPasswordModalProps> = ({
+  email,
+}: ResetPasswordModalProps): JSX.Element => {
   const {
     handleSubmit,
     register,
@@ -35,23 +35,15 @@ const Login: React.FC<Props> = (props: Props) => {
   const toast = useToast();
   const navigate = useNavigate();
   const [loginError, setLoginError] = React.useState<String>("");
-  const [checked, setChecked] = React.useState<boolean>(false);
-  const [email, setEmail] = React.useState<string>("");
-  React.useEffect(() => {
-    if (localStorage.getItem("email")) {
-      setChecked(true);
-      setEmail(localStorage.getItem("email") || "");
-    }
-  }, []);
 
   const onSubmit = (values: any) => {
-    console.log(values)
-    localStorage.setItem("email", values.email);
     authService
-      .signIn(values.email, values.password)
+      .resetPassword(values.email)
       .then(() => {
         toast({
-          title: "Connexion réusi",
+          title: "Demande de réinitialisation fait avec succès",
+          description:
+            "Si votre email est connue, vous receverez un email pour réinitialiser votre mot de passe",
           status: "success",
           isClosable: true,
         });
@@ -73,7 +65,6 @@ const Login: React.FC<Props> = (props: Props) => {
   if (user) {
     return <Navigate to="/" />;
   }
-
   return (
     <Flex
       w={"100%"}
@@ -85,11 +76,8 @@ const Login: React.FC<Props> = (props: Props) => {
       <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
         <Stack align={"center"}>
           <Heading fontSize={"3xl"} textAlign={"center"}>
-            Connectez vous à votre compte
+            Réinitialiser votre mot de passe
           </Heading>
-          <Text fontSize={"lg"} color={"gray.600"}>
-            Pour saisir ou consultés vos heures
-          </Text>
         </Stack>
         <Box rounded={"lg"} bg={"white"} boxShadow={"lg"} p={8}>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -102,7 +90,7 @@ const Login: React.FC<Props> = (props: Props) => {
                     <AlertDescription display={"block"}>
                       {loginError}
                     </AlertDescription>
-                    <CloseButton position="absolute" right="8px" top="8px" onClick={() => setLoginError("")}/>
+                    <CloseButton position="absolute" right="8px" top="8px" />
                   </Box>
                 </Alert>
               )}
@@ -111,39 +99,14 @@ const Login: React.FC<Props> = (props: Props) => {
                 <Input
                   type="email"
                   id="email"
+                  defaultValue={email}
                   placeholder="exemple@exemple.fr"
-                  value={email}
                   {...register("email", {
                     required: "Ce champs est requis",
                   })}
                 />
               </FormControl>
-              <FormControl id="password" isInvalid={errors.name}>
-                <FormLabel>Mot de passe</FormLabel>
-                <Input
-                  type="password"
-                  id="password"
-                  {...register("password", {
-                    required: "Ce champs est requis",
-                  })}
-                />
-              </FormControl>
               <Stack spacing={10}>
-                <Stack
-                  direction={{ base: "column", sm: "row" }}
-                  align={"start"}
-                  justify={"space-between"}
-                >
-                  <Checkbox
-                    onChange={() => setChecked(!checked)}
-                    isChecked={checked}
-                  >
-                    Se souvenir de moi
-                  </Checkbox>
-                  <Link color={"blue.400"} href={"/reinitialiser"}>
-                    Mot de passe oubliés?
-                  </Link>
-                </Stack>
                 <Button
                   isLoading={isSubmitting}
                   type="submit"
@@ -153,7 +116,7 @@ const Login: React.FC<Props> = (props: Props) => {
                     bg: "blue.500",
                   }}
                 >
-                  Connexion
+                  Réinitialiser
                 </Button>
               </Stack>
             </Stack>
@@ -164,4 +127,4 @@ const Login: React.FC<Props> = (props: Props) => {
   );
 };
 
-export default Login;
+export default ResetPassword;

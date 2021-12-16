@@ -12,8 +12,10 @@ import {
   NumberInputStepper,
   Select,
   SimpleGrid,
+  Spinner,
   Stack,
-  Text
+  Text,
+  useToast
 } from "@chakra-ui/react";
 import {
   addHours,
@@ -28,80 +30,25 @@ import {
 } from "date-fns";
 import { fr } from "date-fns/locale";
 import * as React from "react";
-import { FaArrowLeft, FaArrowRight, FaCoffee } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaCoffee, FaSave } from "react-icons/fa";
 import { FcClock, FcOvertime, FcPlanner } from "react-icons/fc";
 import StatsCard from "../component/statsCard";
+import { AuthContext } from "../context/authContext";
+import timesheetService from "../services/database.service";
+import {
+  defaultState,
+  ITimeSheetData,
+  IWeekDetails
+} from "../type/timesheet.contants";
+import { generateID } from "../utils/id";
 import { capitalize } from "../utils/string";
-
-interface Jour {
-  [index: number]: {
-    morning: HoursDetail;
-    afternoon: HoursDetail;
-  };
-}
-
-interface HoursDetail {
-  from: string;
-  to: string;
-}
-
-const defaultState = {
-  0: {
-    morning: {
-      from: "8",
-      to: "12",
-    },
-    afternoon: {
-      from: "14",
-      to: "17",
-    },
-  },
-  1: {
-    morning: {
-      from: "8",
-      to: "12",
-    },
-    afternoon: {
-      from: "14",
-      to: "17",
-    },
-  },
-  2: {
-    morning: {
-      from: "8",
-      to: "12",
-    },
-    afternoon: {
-      from: "14",
-      to: "17",
-    },
-  },
-  3: {
-    morning: {
-      from: "8",
-      to: "12",
-    },
-    afternoon: {
-      from: "14",
-      to: "17",
-    },
-  },
-  4: {
-    morning: {
-      from: "8",
-      to: "12",
-    },
-    afternoon: {
-      from: "14",
-      to: "17",
-    },
-  },
-};
 
 interface Props {}
 
 const Timesheet: React.FC<Props> = (props: Props) => {
-  const [workingHours, setWorkingHours] = React.useState<Jour>(defaultState);
+  const user = React.useContext(AuthContext);
+  const [workingHours, setWorkingHours] =
+    React.useState<IWeekDetails>(defaultState);
   const [now] = React.useState<Date>(new Date());
   const [date, setDate] = React.useState<Date>(new Date());
   const [week, setWeek] = React.useState<number>(getISOWeek(date));
@@ -115,10 +62,24 @@ const Timesheet: React.FC<Props> = (props: Props) => {
   const [totalWorkingHours, setTotalWorkingHours] = React.useState<number>(0);
   const [totalAdditionalHours, setTotalAdditionalHours] =
     React.useState<number>(0);
+  const [isFetchingData, setIsFetchingDate] = React.useState<boolean>(false);
+  const toast = useToast();
 
   React.useEffect(() => {
-    setWorkingHours(defaultState);
-  }, [week]);
+    setIsFetchingDate(!setIsFetchingDate);
+    timesheetService
+      .getByKey("thomas", generateID("brendan", startDay))
+      .then((snapshot) => {
+        setIsFetchingDate(!setIsFetchingDate);
+        setWorkingHours(snapshot.val().timesheetDetails);
+      })
+      .catch((e) => {
+        setIsFetchingDate(!setIsFetchingDate);
+        setWorkingHours(defaultState);
+        console.error(e);
+      });
+  }, [week, startDay]);
+
   React.useEffect(() => {
     const sumHoursOfWeek = (): number => {
       let total = 0;
@@ -127,21 +88,19 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         Object.entries(workingHours[parseInt(k)]).forEach(([key, value]) => {
           let morningSum = 0;
           let afternoonSum = 0;
-          Object.entries(value).forEach(([k, v]) => {
-            if (key === "morning") {
-              const d1 = new Date("2021, 11, 14");
-              const d2 = new Date("2021, 11, 14");
-              d1.setHours(parseInt(value.from));
-              d2.setHours(parseInt(value.to));
-              morningSum = differenceInHours(d2, d1);
-            } else {
-              const d1 = new Date("2021, 11, 14");
-              const d2 = new Date("2021, 11, 14");
-              d1.setHours(parseInt(value.from));
-              d2.setHours(parseInt(value.to));
-              afternoonSum = differenceInHours(d2, d1);
-            }
-          });
+          if (key === "morning") {
+            const d1 = new Date("2021, 11, 14");
+            const d2 = new Date("2021, 11, 14");
+            d1.setHours(parseInt(value.from));
+            d2.setHours(parseInt(value.to));
+            morningSum = differenceInHours(d2, d1);
+          } else {
+            const d1 = new Date("2021, 11, 14");
+            const d2 = new Date("2021, 11, 14");
+            d1.setHours(parseInt(value.from));
+            d2.setHours(parseInt(value.to));
+            afternoonSum = differenceInHours(d2, d1);
+          }
           totalDay += morningSum + afternoonSum;
         });
         total += totalDay;
@@ -189,6 +148,36 @@ const Timesheet: React.FC<Props> = (props: Props) => {
 
   const format = (val: string) => ("0" + val).slice(-2) + `h`;
   const parse = (val: string) => val.replace(/^h/, "");
+
+  const saveTimeSheet = () => {
+    const data: ITimeSheetData = {
+      key: generateID("brendan", startDay),
+      username: "thomas",
+      startDay: startDay.toISOString(),
+      weekNumber: week,
+      timesheetDetails: workingHours,
+    };
+
+    timesheetService
+      .createUpdate(data)
+      .then(() => {
+        toast({
+          title: "Enregistrement réussie",
+          description: `Semaine n°${week} sauvegarder`,
+          status: "success",
+          isClosable: true,
+        });
+      })
+      .catch((e: Error) => {
+        toast({
+          title: `Erreur lors de l'enregistrement`,
+          description: `Une erreur inatendu, veuillez reesayer ou contacter l'administrateur`,
+          status: "error",
+          isClosable: true,
+        });
+        console.error(e);
+      });
+  };
 
   const generateWeeklyStats = (): React.ReactElement => {
     return (
@@ -248,7 +237,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
             <Text fontWeight={600} fontSize={"xl"}>
               Déclarant
             </Text>
-            <Text>Thomas Foufe</Text>
+            <Text>{user?.displayName || ""}</Text>
           </Stack>
           <Stack>
             <ButtonGroup variant="outline" spacing="6">
@@ -473,17 +462,36 @@ const Timesheet: React.FC<Props> = (props: Props) => {
             {result}
           </Grid>
         </Box>
+        <Button
+          onClick={() => saveTimeSheet()}
+          colorScheme={"teal"}
+          rightIcon={<FaSave />}
+        >
+          Enregistrer
+        </Button>
       </Stack>
     );
   };
 
-  return (
-    <Box>
-      {generateWeeklyAction()}
-      {generateWeeklyStats()}
-      {generateDays()}
-    </Box>
-  );
+  const loadingComponent = () => {
+    return (
+      <Box>
+        <Spinner size={"xl"} />
+      </Box>
+    );
+  };
+
+  const timeSheetComp = () => {
+    return (
+      <Box>
+        {generateWeeklyAction()}
+        {generateWeeklyStats()}
+        {generateDays()}
+      </Box>
+    );
+  };
+
+  return isFetchingData ? loadingComponent() : timeSheetComp();
 };
 
 export default Timesheet;

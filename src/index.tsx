@@ -1,28 +1,49 @@
 import { Box, ChakraProvider, theme } from "@chakra-ui/react";
 import * as React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  Route,
+  Routes
+} from "react-router-dom";
+import { AuthContext } from "./context/authContext";
+import { AuthProvider } from "./context/authProvider";
 import Home from "./home/home";
 import Login from "./login/login";
+import ResetPassword from "./login/resetPassword";
 import SimpleSidebar from "./menu/sidebar";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorker from "./serviceWorker";
 import Timesheet from "./timesheet/timesheet";
 
+const PrivateRoute = () => {
+  const user = React.useContext(AuthContext);
+  return user ? <Outlet /> : <Navigate to="/connexion" />;
+};
+
 ReactDOM.render(
   <BrowserRouter>
     <React.StrictMode>
-      <ChakraProvider theme={theme}>
-        <SimpleSidebar>
-          <Box>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/saisie" element={<Timesheet />} />
-              <Route path="/connexion" element={<Login />} />
-            </Routes>
-          </Box>
-        </SimpleSidebar>
-      </ChakraProvider>
+      <AuthProvider>
+        <ChakraProvider theme={theme}>
+          <SimpleSidebar>
+            <Box>
+              <Routes>
+                <Route path="/connexion" element={<Login />} />
+                <Route path="/reinitialiser" element={<ResetPassword />} />
+                <Route path="/" element={<PrivateRoute />}>
+                  <Route path="/" element={<Home />} />
+                </Route>
+                <Route path="/saisie" element={<PrivateRoute />}>
+                  <Route path="/saisie" element={<Timesheet />} />
+                </Route>
+              </Routes>
+            </Box>
+          </SimpleSidebar>
+        </ChakraProvider>
+      </AuthProvider>
     </React.StrictMode>
   </BrowserRouter>,
   document.getElementById("root")
