@@ -128,13 +128,13 @@ const Admin = () => {
     return (
       <div className="print-container" ref={componentRef}>
         <div className="header">
-          <h1>Récapitulatif Employées</h1>
+          <h1>Récapitulatif Employés</h1>
           <h3>Sur l'année: {year}</h3>
         </div>
         <table>
           <thead>
             <tr>
-              <th>Employée</th>
+              <th>Employé</th>
               {generateMonths().map((month) => {
                 return <th key={month}>{month}</th>;
               })}
@@ -171,7 +171,7 @@ const Admin = () => {
               </Button>
             </Flex>
             <Text textAlign={"center"} fontWeight={700} fontSize={"2xl"}>
-              Récapitulatif Employées
+              Récapitulatif Employés
             </Text>
             <FormLabel>Récapitulatif sur l'année :</FormLabel>
             <Select
@@ -192,7 +192,7 @@ const Admin = () => {
               <Table variant="simple">
                 <Thead>
                   <Tr>
-                    <Th>Employée</Th>
+                    <Th>Employé</Th>
                     {generateMonths().map((month) => {
                       return <Th key={month}>{month}</Th>;
                     })}

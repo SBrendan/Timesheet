@@ -19,7 +19,7 @@ const Home: React.FC<any> = () => {
             <Image src={logo} boxSize="150px" />
           </Flex>
           <Heading as="h1">
-            Bienvenue sur l'outils de suivie d'heure d'Epivert Services
+            Bienvenue sur l'outil de suivi d'heures d'Epivert Services
           </Heading>
         </Stack>
       </Box>

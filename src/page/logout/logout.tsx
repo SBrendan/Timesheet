@@ -9,7 +9,7 @@ const Logout = () => {
     authService.signOut();
     toast({
       title: "Déconnexion",
-      description: "Correctement réaliser",
+      description: "Correctement réalisée",
       status: "success",
     });
   }, [toast]);

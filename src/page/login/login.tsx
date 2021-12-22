@@ -55,7 +55,7 @@ const Login: React.FC<Props> = (props: Props) => {
       .signIn(values.email, values.password)
       .then((user) => {
         toast({
-          title: "Connexion réusi",
+          title: "Connexion réussie",
           status: "success",
           isClosable: true,
         });
@@ -63,12 +63,12 @@ const Login: React.FC<Props> = (props: Props) => {
       })
       .catch((e) => {
         if (e.code === "auth/user-not-found") {
-          setLoginError("Utilisateur inconu");
+          setLoginError("Utilisateur inconnu");
         } else if (e.code === "auth/wrong-password") {
           setLoginError("Email ou Mot de passe invalide");
         } else if (e.code === "auth/too-many-requests") {
           setLoginError(
-            "Trop de tentative. Veuillez pattientez et reesayer dans un instant"
+            "Trop de tentatives. Veuillez patienter et réesayer dans un instant"
           );
         }
       });
@@ -89,7 +89,7 @@ const Login: React.FC<Props> = (props: Props) => {
             Connectez vous à votre compte
           </Heading>
           <Text fontSize={"lg"} color={"gray.600"}>
-            Pour saisir ou consultés vos heures
+            Pour saisir ou consulter vos heures
           </Text>
         </Stack>
         <Box
@@ -105,7 +105,7 @@ const Login: React.FC<Props> = (props: Props) => {
                 <Alert status="error">
                   <AlertIcon />
                   <Box flex={1}>
-                    <AlertTitle>Érreur d'authentification</AlertTitle>
+                    <AlertTitle>Erreur d'authentification</AlertTitle>
                     <AlertDescription display={"block"}>
                       {loginError}
                     </AlertDescription>
@@ -153,7 +153,7 @@ const Login: React.FC<Props> = (props: Props) => {
                     Se souvenir de moi
                   </Checkbox>
                   <Link color={"blue.400"} href={"/reinitialiser"}>
-                    Mot de passe oubliés?
+                    Mot de passe oublié ?
                   </Link>
                 </Stack>
                 <Button

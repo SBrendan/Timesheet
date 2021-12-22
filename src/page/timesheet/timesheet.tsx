@@ -173,8 +173,8 @@ const Timesheet: React.FC<Props> = (props: Props) => {
       .createUpdate(data)
       .then(() => {
         toast({
-          title: "Enregistrement réussie",
-          description: `Semaine n°${week} sauvegarder`,
+          title: "Enregistrement réussi",
+          description: `Semaine n°${week} sauvegardée`,
           status: "success",
           isClosable: true,
         });
@@ -182,7 +182,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
       .catch((e: Error) => {
         toast({
           title: `Erreur lors de l'enregistrement`,
-          description: `Une erreur inatendu, veuillez reesayer ou contacter l'administrateur`,
+          description: `Une erreur inatendue, veuillez réesayer ou contacter l'administrateur`,
           status: "error",
           isClosable: true,
         });
@@ -221,12 +221,12 @@ const Timesheet: React.FC<Props> = (props: Props) => {
               icon={<FcClock size={"3em"} />}
             />
             <StatsCard
-              title={"Réalisé"}
-              stat={totalWorkingHours + "h"}
+              title={"Heures Réalisées"}
+              stat={totalWorkingHours}
               icon={<FcPlanner size={"3em"} />}
             />
             <StatsCard
-              title={"Suplémentaire"}
+              title={"Heures Suplémentaires"}
               stat={totalAdditionalHours + "h"}
               icon={<FcOvertime size={"3em"} />}
             />
@@ -256,19 +256,11 @@ const Timesheet: React.FC<Props> = (props: Props) => {
           >
             <Stack>
               <ButtonGroup variant="outline">
-                <Button
-                  leftIcon={<FaArrowLeft />}
-                  onClick={() => prevWeek()}
-                >
-                  Semaine passer
+                <Button leftIcon={<FaArrowLeft />} onClick={() => prevWeek()}>
+                  Semaine passée
                 </Button>
-                <Button onClick={() => curWeek()}>
-                  Semaine courante
-                </Button>
-                <Button
-                  rightIcon={<FaArrowRight />}
-                  onClick={() => nextWeek()}
-                >
+                <Button onClick={() => curWeek()}>Semaine courante</Button>
+                <Button rightIcon={<FaArrowRight />} onClick={() => nextWeek()}>
                   Semaine suivante
                 </Button>
               </ButtonGroup>
