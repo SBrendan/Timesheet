@@ -222,7 +222,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
             />
             <StatsCard
               title={"Heures Réalisées"}
-              stat={totalWorkingHours}
+              stat={totalWorkingHours+"h"}
               icon={<FcPlanner size={"3em"} />}
             />
             <StatsCard
