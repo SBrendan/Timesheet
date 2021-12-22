@@ -9,12 +9,13 @@ import {
   Routes
 } from "react-router-dom";
 import { AuthContext, AuthProvider } from "./context/authProvider";
+import Admin from "./page/admin/admin";
 import Home from "./page/home/home";
 import Login from "./page/login/login";
 import ResetPassword from "./page/login/resetPassword";
 import Logout from "./page/logout/logout";
 import SimpleSidebar from "./page/menu/sidebar";
-import Admin from "./page/profil/admin";
+import Profil from "./page/profil/profil";
 import Timesheet from "./page/timesheet/timesheet";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorker from "./serviceWorker";
@@ -39,6 +40,7 @@ ReactDOM.render(
                   <Route path="/" element={<Home />} />
                   <Route path="/saisie" element={<Timesheet />} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/profile" element={<Profil />} />
                 </Route>
               </Routes>
             </Box>
