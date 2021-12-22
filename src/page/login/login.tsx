@@ -11,6 +11,7 @@ import {
   FormControl,
   FormLabel,
   Heading,
+  Image,
   Input,
   Link,
   Stack,
@@ -21,6 +22,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { Navigate, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/authProvider";
+import logo from "../../images/logo.png";
 import authService from "../../services/auth.service";
 
 interface Props {}
@@ -82,6 +84,7 @@ const Login: React.FC<Props> = (props: Props) => {
     >
       <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
         <Stack align={"center"}>
+          <Image src={logo} boxSize="150px" />
           <Heading fontSize={"3xl"} textAlign={"center"}>
             Connectez vous à votre compte
           </Heading>

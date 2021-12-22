@@ -10,14 +10,15 @@ import {
   FormControl,
   FormLabel,
   Heading,
+  Image,
   Input,
   Stack,
   useToast
 } from "@chakra-ui/react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { Navigate, useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/authProvider";
+import { useNavigate } from "react-router-dom";
+import logo from "../../images/logo.png";
 import authService from "../../services/auth.service";
 
 interface ResetPasswordModalProps {
@@ -31,7 +32,6 @@ const ResetPassword: React.FC<ResetPasswordModalProps> = ({
     register,
     formState: { errors, isSubmitting },
   } = useForm();
-  const user = React.useContext(AuthContext);
   const toast = useToast();
   const navigate = useNavigate();
   const [loginError, setLoginError] = React.useState<String>("");
@@ -47,7 +47,7 @@ const ResetPassword: React.FC<ResetPasswordModalProps> = ({
           status: "success",
           isClosable: true,
         });
-        navigate("/saisie");
+        navigate("/connexion");
       })
       .catch((e) => {
         if (e.code === "auth/user-not-found") {
@@ -61,9 +61,7 @@ const ResetPassword: React.FC<ResetPasswordModalProps> = ({
         }
       });
   };
-  if (user) {
-    return <Navigate to="/" />;
-  }
+
   return (
     <Flex
       w={"100%"}
@@ -74,6 +72,8 @@ const ResetPassword: React.FC<ResetPasswordModalProps> = ({
     >
       <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
         <Stack align={"center"}>
+          <Image src={logo} boxSize="150px" />
+
           <Heading fontSize={"3xl"} textAlign={"center"}>
             Réinitialiser votre mot de passe
           </Heading>
