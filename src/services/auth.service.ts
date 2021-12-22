@@ -21,6 +21,13 @@ class AuthService {
   resetPassword(email: string) {
     return auth.sendPasswordResetEmail(email);
   }
+  
+
+  updateProfile(name: string) {
+    return auth.currentUser?.updateProfile({
+      displayName: name});
+  }
+
 }
 
 export default new AuthService();

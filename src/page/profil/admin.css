@@ -1,0 +1,67 @@
+/* To print onto A4, landscape: 297mm X 210mm */
+/* The number of lines in the table. (That would be the number of rows if there was only one line in each row. */
+/* Some correction is sometimes needed to adjust the height of lines to make sure the whole table fits on the page. */
+@media print {
+  /* This can also be used instead of "table-layout: fixed;
+	" above for the text-overflow to function with percentage widths on the td or th */
+  /* tr>* {
+		 max-width: 0;
+	}
+	*/
+  /* if the inner content gets higher, then the td will too. (max-height on td wouldn't have any effect. */
+  /* Let us add some colors for debugging to delimitate the page area with the margins removed */
+  *,
+  *:before,
+  *:after {
+    box-sizing: border-box;
+  }
+  @page {
+    size: 297mm 210mm;
+    margin: 10mm;
+  }
+  table {
+    table-layout: fixed;
+    width: 277mm;
+  }
+  td,
+  th {
+    width: 18%;
+    padding: 0 1mm 0 1mm;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: 0.3px solid black;
+    height: 3.3615384615mm;
+    font-size: 3.3615384615mm;
+    line-height: 3.3615384615mm;
+  }
+  th:first-child {
+    width: 30%;
+  }
+  td > div {
+    height: 3.3615384615mm;
+  }
+  body {
+    position: relative;
+  }
+  .background {
+    width: 277mm;
+    height: 189.5mm;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(227, 237, 37, 0.5);
+  }
+  .header {
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+	text-align: center;
+  }
+}
+
+@media screen {
+  .print-container {
+    display: none;
+  }
+}

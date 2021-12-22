@@ -5,52 +5,61 @@ import {
   AlertTitle,
   Box,
   Button,
+  Checkbox,
   CloseButton,
   Flex,
   FormControl,
   FormLabel,
   Heading,
   Input,
+  Link,
   Stack,
+  Text,
   useToast
 } from "@chakra-ui/react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { Navigate, useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/authContext";
-import authService from "../services/auth.service";
+import { AuthContext } from "../../context/authProvider";
+import authService from "../../services/auth.service";
 
-interface ResetPasswordModalProps {
-  email?: string;
-}
-const ResetPassword: React.FC<ResetPasswordModalProps> = ({
-  email,
-}: ResetPasswordModalProps): JSX.Element => {
+interface Props {}
+
+const Login: React.FC<Props> = (props: Props) => {
   const {
     handleSubmit,
     register,
     formState: { errors, isSubmitting },
   } = useForm();
-  const user = React.useContext(AuthContext);
+  const { isLoggedIn } = React.useContext(AuthContext);
   const toast = useToast();
   const navigate = useNavigate();
   const [loginError, setLoginError] = React.useState<String>("");
+  const [checked, setChecked] = React.useState<boolean>(false);
+  const [email, setEmail] = React.useState<string>("");
+  React.useEffect(() => {
+    if (localStorage.getItem("email")) {
+      setChecked(true);
+      setEmail(localStorage.getItem("email") || "");
+    }
+  }, []);
+  if (isLoggedIn) {
+    return <Navigate to="/" />;
+  }
 
   const onSubmit = (values: any) => {
+    localStorage.setItem("email", values.email);
     authService
-      .resetPassword(values.email)
-      .then(() => {
+      .signIn(values.email, values.password)
+      .then((user) => {
         toast({
-          title: "Demande de réinitialisation fait avec succès",
-          description:
-            "Si votre email est connue, vous receverez un email pour réinitialiser votre mot de passe",
+          title: "Connexion réusi",
           status: "success",
           isClosable: true,
         });
         navigate("/saisie");
       })
       .catch((e) => {
-        console.log(e);
         if (e.code === "auth/user-not-found") {
           setLoginError("Utilisateur inconu");
         } else if (e.code === "auth/wrong-password") {
@@ -62,9 +71,7 @@ const ResetPassword: React.FC<ResetPasswordModalProps> = ({
         }
       });
   };
-  if (user) {
-    return <Navigate to="/" />;
-  }
+
   return (
     <Flex
       w={"100%"}
@@ -76,11 +83,20 @@ const ResetPassword: React.FC<ResetPasswordModalProps> = ({
       <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
         <Stack align={"center"}>
           <Heading fontSize={"3xl"} textAlign={"center"}>
-            Réinitialiser votre mot de passe
+            Connectez vous à votre compte
           </Heading>
+          <Text fontSize={"lg"} color={"gray.600"}>
+            Pour saisir ou consultés vos heures
+          </Text>
         </Stack>
-        <Box rounded={"lg"} bg={"white"} boxShadow={"lg"} p={8}>
-          <form onSubmit={handleSubmit(onSubmit)}>
+        <Box
+          rounded={"lg"}
+          bg={"white"}
+          boxShadow={"lg"}
+          p={8}
+          onKeyPress={(e) => (e.key === "Enter" ? handleSubmit(onSubmit) : "")}
+        >
+          <form>
             <Stack spacing={4}>
               {loginError && (
                 <Alert status="error">
@@ -90,25 +106,56 @@ const ResetPassword: React.FC<ResetPasswordModalProps> = ({
                     <AlertDescription display={"block"}>
                       {loginError}
                     </AlertDescription>
-                    <CloseButton position="absolute" right="8px" top="8px" />
+                    <CloseButton
+                      position="absolute"
+                      right="8px"
+                      top="8px"
+                      onClick={() => setLoginError("")}
+                    />
                   </Box>
                 </Alert>
               )}
-              <FormControl htmlFor="email" isInvalid={errors.name}>
-                <FormLabel>Adresse Email</FormLabel>
+              <FormControl isInvalid={errors.email}>
+                <FormLabel htmlFor="email">Adresse Email</FormLabel>
                 <Input
                   type="email"
                   id="email"
-                  defaultValue={email}
                   placeholder="exemple@exemple.fr"
+                  defaultValue={email}
                   {...register("email", {
                     required: "Ce champs est requis",
                   })}
                 />
               </FormControl>
+              <FormControl isInvalid={errors.password}>
+                <FormLabel htmlFor="password">Mot de passe</FormLabel>
+                <Input
+                  type="password"
+                  id="password"
+                  {...register("password", {
+                    required: "Ce champs est requis",
+                  })}
+                />
+              </FormControl>
               <Stack spacing={10}>
+                <Stack
+                  direction={{ base: "column", sm: "row" }}
+                  align={"start"}
+                  justify={"space-between"}
+                >
+                  <Checkbox
+                    onChange={() => setChecked(!checked)}
+                    isChecked={checked}
+                  >
+                    Se souvenir de moi
+                  </Checkbox>
+                  <Link color={"blue.400"} href={"/reinitialiser"}>
+                    Mot de passe oubliés?
+                  </Link>
+                </Stack>
                 <Button
                   isLoading={isSubmitting}
+                  onClick={handleSubmit(onSubmit)}
                   type="submit"
                   bg={"blue.400"}
                   color={"white"}
@@ -116,7 +163,7 @@ const ResetPassword: React.FC<ResetPasswordModalProps> = ({
                     bg: "blue.500",
                   }}
                 >
-                  Réinitialiser
+                  Connexion
                 </Button>
               </Stack>
             </Stack>
@@ -127,4 +174,4 @@ const ResetPassword: React.FC<ResetPasswordModalProps> = ({
   );
 };
 
-export default ResetPassword;
+export default Login;

@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   ButtonGroup,
-  Flex,
   Grid,
   Icon,
   NumberDecrementStepper,
@@ -32,21 +31,21 @@ import { fr } from "date-fns/locale";
 import * as React from "react";
 import { FaArrowLeft, FaArrowRight, FaCoffee, FaSave } from "react-icons/fa";
 import { FcClock, FcOvertime, FcPlanner } from "react-icons/fc";
-import StatsCard from "../component/statsCard";
-import { AuthContext } from "../context/authContext";
-import timesheetService from "../services/database.service";
+import StatsCard from "../../component/statsCard";
+import { AuthContext } from "../../context/authProvider";
+import timesheetService from "../../services/database.service";
 import {
   defaultState,
   ITimeSheetData,
   IWeekDetails
-} from "../type/timesheet.contants";
-import { generateID } from "../utils/id";
-import { capitalize } from "../utils/string";
+} from "../../type/timesheet.contants";
+import { generateID } from "../../utils/id";
+import { capitalize, snakeCase } from "../../utils/string";
 
 interface Props {}
 
 const Timesheet: React.FC<Props> = (props: Props) => {
-  const user = React.useContext(AuthContext);
+  const { userInfo } = React.useContext(AuthContext);
   const [workingHours, setWorkingHours] =
     React.useState<IWeekDetails>(defaultState);
   const [now] = React.useState<Date>(new Date());
@@ -54,6 +53,9 @@ const Timesheet: React.FC<Props> = (props: Props) => {
   const [week, setWeek] = React.useState<number>(getISOWeek(date));
   const [startDay, setStartDay] = React.useState<Date>(
     startOfWeek(date, { weekStartsOn: 1 })
+  );
+  const [currentYear] = React.useState<string>(
+    new Date().toLocaleString("default", { year: "numeric" })
   );
   const [endDay, setEndDay] = React.useState<Date>(
     endOfWeek(date, { weekStartsOn: 1 })
@@ -68,7 +70,12 @@ const Timesheet: React.FC<Props> = (props: Props) => {
   React.useEffect(() => {
     setIsFetchingDate(!setIsFetchingDate);
     timesheetService
-      .getByKey("thomas", generateID("brendan", startDay))
+      .getByKey(
+        snakeCase(userInfo?.displayName || ""),
+        startDay.toLocaleDateString("default", { year: "numeric" }),
+        startDay.toLocaleDateString("en-Us", { month: "long" }),
+        generateID(snakeCase(userInfo?.displayName || ""), startDay)
+      )
       .then((snapshot) => {
         setIsFetchingDate(!setIsFetchingDate);
         setWorkingHours(snapshot.val().timesheetDetails);
@@ -78,7 +85,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         setWorkingHours(defaultState);
         console.error(e);
       });
-  }, [week, startDay]);
+  }, [week, startDay, userInfo]);
 
   React.useEffect(() => {
     const sumHoursOfWeek = (): number => {
@@ -89,14 +96,14 @@ const Timesheet: React.FC<Props> = (props: Props) => {
           let morningSum = 0;
           let afternoonSum = 0;
           if (key === "morning") {
-            const d1 = new Date("2021, 11, 14");
-            const d2 = new Date("2021, 11, 14");
+            const d1 = new Date(currentYear + ", 11, 14");
+            const d2 = new Date(currentYear + ", 11, 14");
             d1.setHours(parseInt(value.from));
             d2.setHours(parseInt(value.to));
             morningSum = differenceInHours(d2, d1);
           } else {
-            const d1 = new Date("2021, 11, 14");
-            const d2 = new Date("2021, 11, 14");
+            const d1 = new Date(currentYear + ", 11, 14");
+            const d2 = new Date(currentYear + ", 11, 14");
             d1.setHours(parseInt(value.from));
             d2.setHours(parseInt(value.to));
             afternoonSum = differenceInHours(d2, d1);
@@ -108,16 +115,19 @@ const Timesheet: React.FC<Props> = (props: Props) => {
       return total;
     };
     setTotalWorkingHours(sumHoursOfWeek());
-  }, [workingHours]);
+  }, [workingHours, currentYear]);
 
   React.useEffect(() => {
     const sumAdditionalHour = () => {
-      const d1 = addHours(new Date("2021, 11, 14"), totalWorkingHours);
-      const d2 = addHours(new Date("2021, 11, 14"), minWeeks);
+      const d1 = addHours(
+        new Date(currentYear + ", 11, 14"),
+        totalWorkingHours
+      );
+      const d2 = addHours(new Date(currentYear + ", 11, 14"), minWeeks);
       return differenceInHours(d1, d2);
     };
     setTotalAdditionalHours(sumAdditionalHour());
-  }, [totalWorkingHours, minWeeks]);
+  }, [totalWorkingHours, minWeeks, currentYear]);
 
   const changeWeek = (newDate: Date) => {
     setDate(newDate);
@@ -151,10 +161,12 @@ const Timesheet: React.FC<Props> = (props: Props) => {
 
   const saveTimeSheet = () => {
     const data: ITimeSheetData = {
-      key: generateID("brendan", startDay),
-      username: "thomas",
-      startDay: startDay.toISOString(),
+      key: startDay.getTime(),
+      username: snakeCase(userInfo?.displayName || ""),
+      month: startDay.toLocaleDateString("en-US", { month: "long" }),
       weekNumber: week,
+      totalAdditionalHours: totalAdditionalHours,
+      year: startDay.toLocaleDateString("default", { year: "numeric" }),
       timesheetDetails: workingHours,
     };
 
@@ -232,47 +244,56 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         padding={5}
         boxShadow={"rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px"}
       >
-        <Flex justifyContent={"space-between"}>
-          <Stack>
+        <SimpleGrid columns={{ base: 1, md: 2 }}>
+          <Box>
             <Text fontWeight={600} fontSize={"xl"}>
               Déclarant
             </Text>
-            <Text>{user?.displayName || ""}</Text>
-          </Stack>
-          <Stack>
-            <ButtonGroup variant="outline" spacing="6">
-              <Button leftIcon={<FaArrowLeft />} onClick={() => prevWeek()}>
-                Semaine passer
-              </Button>
-              <Button onClick={() => curWeek()}>Semaine courante</Button>
-              <Button rightIcon={<FaArrowRight />} onClick={() => nextWeek()}>
-                Semaine suivante
-              </Button>
-            </ButtonGroup>
-            <Flex justifyContent={"space-between"}>
-              <Select
-                size={"xs"}
-                variant="flushed"
-                marginRight={5}
-                defaultValue={getMonth(date)}
-                maxW={"200px"}
-                onChange={(val) => changeMonth(val)}
-              >
-                {generateMonths().map((month, i) => {
-                  return (
-                    <option value={i} key={i}>
-                      {capitalize(month)}
-                    </option>
-                  );
-                })}
-              </Select>
-              <Text fontWeight={"600"} fontSize={"15px"}>
-                Semaine n°{week} - Du {("0" + startDay.getDate()).slice(-2)} au{" "}
-                {("0" + endDay.getDate()).slice(-2)}
-              </Text>
-            </Flex>
-          </Stack>
-        </Flex>
+            <Text>{userInfo?.displayName || ""}</Text>
+          </Box>
+          <Box
+            display={{ base: "block", md: "flex" }}
+            justifyContent={{ base: "unset", md: "right" }}
+          >
+            <Stack>
+              <ButtonGroup variant="outline">
+                <Button
+                  leftIcon={<FaArrowLeft />}
+                  onClick={() => prevWeek()}
+                >
+                  Semaine passer
+                </Button>
+                <Button onClick={() => curWeek()}>
+                  Semaine courante
+                </Button>
+                <Button
+                  rightIcon={<FaArrowRight />}
+                  onClick={() => nextWeek()}
+                >
+                  Semaine suivante
+                </Button>
+              </ButtonGroup>
+              <Stack>
+                <Select
+                  size={"xs"}
+                  variant="flushed"
+                  marginRight={5}
+                  defaultValue={getMonth(date)}
+                  maxW={"200px"}
+                  onChange={(val) => changeMonth(val)}
+                >
+                  {generateMonths().map((month, i) => {
+                    return (
+                      <option value={i} key={i}>
+                        {capitalize(month)}
+                      </option>
+                    );
+                  })}
+                </Select>
+              </Stack>
+            </Stack>
+          </Box>
+        </SimpleGrid>
       </Box>
     );
   };

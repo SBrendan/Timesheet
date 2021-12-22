@@ -13,11 +13,12 @@ import {
   useColorModeValue,
   useDisclosure
 } from "@chakra-ui/react";
-import React, { ReactNode, ReactText } from "react";
+import * as React from "react";
 import { IconType } from "react-icons";
-import { FiClock, FiHome, FiMenu } from "react-icons/fi";
+import { FiClock, FiHome, FiLogOut, FiMenu, FiUser } from "react-icons/fi";
 import { GiButterfly } from "react-icons/gi";
 import { NavLink } from "react-router-dom";
+import { AuthContext } from "../../context/authProvider";
 
 interface LinkItemProps {
   name: string;
@@ -27,15 +28,22 @@ interface LinkItemProps {
 const LinkItems: Array<LinkItemProps> = [
   { name: "Accueil", path: "/", icon: FiHome },
   { name: "Déclarer", path: "/saisie", icon: FiClock },
+  { name: "Administration", path: "/admin", icon: FiUser },
+  { name: "Déconnexion", path: "/deconnexion", icon: FiLogOut },
 ];
 
-export default function SimpleSidebar({ children }: { children: ReactNode }) {
+export default function SimpleSidebar({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isLoggedIn } = React.useContext(AuthContext);
   return (
     <Box minH="100vh" bg={"#f6fafc"}>
       <SidebarContent
         onClose={() => onClose}
-        display={{ base: "none", md: "block" }}
+        display={isLoggedIn ? { base: "none", md: "block" } : "none"}
       />
       <Drawer
         autoFocus={false}
@@ -50,11 +58,8 @@ export default function SimpleSidebar({ children }: { children: ReactNode }) {
           <SidebarContent onClose={onClose} />
         </DrawerContent>
       </Drawer>
-      {/* mobilenav */}
       <MobileNav display={{ base: "flex", md: "none" }} onOpen={onOpen} />
-      <Box ml={{ base: 0, md: 60 }}>
-        {children}
-      </Box>
+      <Box ml={isLoggedIn ? { base: 0, md: 60 } : { md: 0 }}>{children}</Box>
     </Box>
   );
 }
@@ -64,6 +69,8 @@ interface SidebarProps extends BoxProps {
 }
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
+  const { isAdmin } = React.useContext(AuthContext);
+
   return (
     <Box
       bg={useColorModeValue("white", "gray.900")}
@@ -75,29 +82,41 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       {...rest}
     >
       <Flex h="20" alignItems="center" justifyContent="center">
-        <Text fontSize="md" fontWeight="bold">
-          <Icon
-            as={GiButterfly}
-            color={"#3FC7BF"}
-            w={10}
-            h={10}
-          />
+        <Text fontSize="md" fontWeight="bold" as={NavLink} to={"/"}>
+          <Icon as={GiButterfly} color={"#3FC7BF"} w={10} h={10} />
           Epivert Services
         </Text>
-        <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} marginLeft={"auto"}/>
+        <CloseButton
+          display={{ base: "flex", md: "none" }}
+          onClick={onClose}
+          marginLeft={"auto"}
+        />
       </Flex>
-      {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon} path={link.path}>
-          {link.name}
-        </NavItem>
-      ))}
+      {LinkItems.map((link) => {
+        if (link.name === "Administration") {
+          if (isAdmin) {
+            return (
+              <NavItem key={link.name} icon={link.icon} path={link.path}>
+                {link.name}
+              </NavItem>
+            );
+          }
+        } else {
+          return (
+            <NavItem key={link.name} icon={link.icon} path={link.path}>
+              {link.name}
+            </NavItem>
+          );
+        }
+        return null;
+      })}
     </Box>
   );
 };
 
 interface NavItemProps extends FlexProps {
   icon: IconType;
-  children: ReactText;
+  children: React.ReactText;
   path: string;
 }
 const NavItem = ({ icon, children, path, ...rest }: NavItemProps) => {
@@ -155,7 +174,14 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         icon={<FiMenu />}
       />
 
-      <Text fontSize="2xl" ml="8" fontFamily="monospace" fontWeight="bold">
+      <Text
+        fontSize="2xl"
+        ml="8"
+        fontFamily="monospace"
+        fontWeight="bold"
+        as={NavLink}
+        to={"/"}
+      >
         Epivert Services
       </Text>
     </Flex>

@@ -8,19 +8,20 @@ import {
   Route,
   Routes
 } from "react-router-dom";
-import { AuthContext } from "./context/authContext";
-import { AuthProvider } from "./context/authProvider";
-import Home from "./home/home";
-import Login from "./login/login";
-import ResetPassword from "./login/resetPassword";
-import SimpleSidebar from "./menu/sidebar";
+import { AuthContext, AuthProvider } from "./context/authProvider";
+import Home from "./page/home/home";
+import Login from "./page/login/login";
+import ResetPassword from "./page/login/resetPassword";
+import Logout from "./page/logout/logout";
+import SimpleSidebar from "./page/menu/sidebar";
+import Admin from "./page/profil/admin";
+import Timesheet from "./page/timesheet/timesheet";
 import reportWebVitals from "./reportWebVitals";
 import * as serviceWorker from "./serviceWorker";
-import Timesheet from "./timesheet/timesheet";
 
 const PrivateRoute = () => {
-  const user = React.useContext(AuthContext);
-  return user ? <Outlet /> : <Navigate to="/connexion" />;
+  const { loading, isLoggedIn } = React.useContext(AuthContext);
+  return !loading && isLoggedIn ? <Outlet /> : <Navigate to="/connexion" />;
 };
 
 ReactDOM.render(
@@ -32,12 +33,12 @@ ReactDOM.render(
             <Box>
               <Routes>
                 <Route path="/connexion" element={<Login />} />
+                <Route path="/deconnexion" element={<Logout />} />
                 <Route path="/reinitialiser" element={<ResetPassword />} />
                 <Route path="/" element={<PrivateRoute />}>
                   <Route path="/" element={<Home />} />
-                </Route>
-                <Route path="/saisie" element={<PrivateRoute />}>
                   <Route path="/saisie" element={<Timesheet />} />
+                  <Route path="/admin" element={<Admin />} />
                 </Route>
               </Routes>
             </Box>

@@ -11,10 +11,12 @@ export interface HoursDetail {
 }
 
 export interface ITimeSheetData {
-  key?: string | null;
+  key?: number | null;
   username: string;
   weekNumber: number;
-  startDay: string;
+  month: string;
+  year: string;
+  totalAdditionalHours: number;
   timesheetDetails: IWeekDetails;
 }
 
