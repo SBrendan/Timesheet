@@ -39,7 +39,6 @@ import {
   ITimeSheetData,
   IWeekDetails
 } from "../../type/timesheet.contants";
-import { generateID } from "../../utils/id";
 import { capitalize, snakeCase } from "../../utils/string";
 
 interface Props {}
@@ -74,7 +73,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         snakeCase(userInfo?.displayName || ""),
         startDay.toLocaleDateString("default", { year: "numeric" }),
         startDay.toLocaleDateString("en-Us", { month: "long" }),
-        generateID(snakeCase(userInfo?.displayName || ""), startDay)
+        startDay.getTime() +""
       )
       .then((snapshot) => {
         setIsFetchingDate(!setIsFetchingDate);
