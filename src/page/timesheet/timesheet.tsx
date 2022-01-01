@@ -4,11 +4,6 @@ import {
   ButtonGroup,
   Grid,
   Icon,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
   Select,
   SimpleGrid,
   Spinner,
@@ -19,8 +14,7 @@ import {
 import {
   addHours,
   addWeeks,
-  differenceInHours,
-  eachDayOfInterval,
+  differenceInHours, eachDayOfInterval,
   endOfWeek,
   getISOWeek,
   getMonth,
@@ -31,6 +25,7 @@ import { fr } from "date-fns/locale";
 import * as React from "react";
 import { FaArrowLeft, FaArrowRight, FaCoffee, FaSave } from "react-icons/fa";
 import { FcClock, FcOvertime, FcPlanner } from "react-icons/fc";
+import TimePicker from "react-time-picker";
 import StatsCard from "../../component/statsCard";
 import { AuthContext } from "../../context/authProvider";
 import timesheetService from "../../services/database.service";
@@ -40,7 +35,7 @@ import {
   IWeekDetails
 } from "../../type/timesheet.contants";
 import { capitalize, snakeCase } from "../../utils/string";
-
+import "./timesheet.css";
 interface Props {}
 
 const Timesheet: React.FC<Props> = (props: Props) => {
@@ -73,7 +68,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         snakeCase(userInfo?.displayName || ""),
         startDay.toLocaleDateString("default", { year: "numeric" }),
         startDay.toLocaleDateString("en-Us", { month: "long" }),
-        startDay.getTime() +""
+        startDay.getTime() + ""
       )
       .then((snapshot) => {
         setIsFetchingDate(!setIsFetchingDate);
@@ -97,8 +92,10 @@ const Timesheet: React.FC<Props> = (props: Props) => {
           if (key === "morning") {
             const d1 = new Date(currentYear + ", 11, 14");
             const d2 = new Date(currentYear + ", 11, 14");
-            d1.setHours(parseInt(value.from));
-            d2.setHours(parseInt(value.to));
+            d1.setHours(parseInt(value.from.split(":")[0]));
+            d2.setHours(parseInt(value.to.split(":")[0]));
+            d1.setMinutes(parseInt(value.from.split(":")[1]))
+            d2.setMinutes(parseInt(value.to.split(":")[1]))
             morningSum = differenceInHours(d2, d1);
           } else {
             const d1 = new Date(currentYear + ", 11, 14");
@@ -154,9 +151,6 @@ const Timesheet: React.FC<Props> = (props: Props) => {
     const selectedMonth = event.target.selectedOptions[0].value;
     changeWeek(new Date(date.getFullYear(), parseInt(selectedMonth), 1));
   };
-
-  const format = (val: string) => ("0" + val).slice(-2) + `h`;
-  const parse = (val: string) => val.replace(/^h/, "");
 
   const saveTimeSheet = () => {
     const data: ITimeSheetData = {
@@ -222,7 +216,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
             />
             <StatsCard
               title={"Heures Réalisées"}
-              stat={totalWorkingHours+"h"}
+              stat={totalWorkingHours + "h"}
               icon={<FcPlanner size={"3em"} />}
             />
             <StatsCard
@@ -331,7 +325,13 @@ const Timesheet: React.FC<Props> = (props: Props) => {
 
             <Box>
               <Grid column={2} templateColumns="repeat(2, 1fr)" gap={3}>
-                <NumberInput
+                <TimePicker
+                  className={"clock"}
+                  locale="fr-FR"
+                  minTime={"05:00:00"}
+                  value={workingHours[i].morning?.from || ""}
+                  disableClock={true}
+                  format={"HH:mm"}
                   onChange={(valueString) => {
                     setWorkingHours({
                       ...workingHours,
@@ -339,24 +339,19 @@ const Timesheet: React.FC<Props> = (props: Props) => {
                         ...workingHours[i],
                         morning: {
                           ...workingHours[i].morning,
-                          from: parse(valueString),
+                          from: valueString ? valueString.toString() : "00:00",
                         },
                       },
                     });
                   }}
-                  value={format(workingHours[i].morning?.from || "")}
-                  min={0}
-                  max={23}
-                  size="lg"
-                  allowMouseWheel
-                >
-                  <NumberInputField />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
-                </NumberInput>
-                <NumberInput
+                />
+                <TimePicker
+                  className={"clock"}
+                  locale="fr-FR"
+                  minTime={"05:00:00"}
+                  value={workingHours[i].morning?.to || ""}
+                  disableClock={true}
+                  format={"HH:mm"}
                   onChange={(valueString) => {
                     setWorkingHours({
                       ...workingHours,
@@ -364,23 +359,12 @@ const Timesheet: React.FC<Props> = (props: Props) => {
                         ...workingHours[i],
                         morning: {
                           ...workingHours[i].morning,
-                          to: parse(valueString),
+                          to: valueString ? valueString.toString() : "00:00",
                         },
                       },
                     });
                   }}
-                  value={format(workingHours[i].morning?.to || "")}
-                  min={0}
-                  max={23}
-                  size="lg"
-                  allowMouseWheel
-                >
-                  <NumberInputField />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
-                </NumberInput>
+                />
               </Grid>
               <Stack align={"center"} p={3}>
                 <Icon w={9} h={9} as={FaCoffee} />
@@ -390,7 +374,13 @@ const Timesheet: React.FC<Props> = (props: Props) => {
               </Stack>
 
               <Grid column={2} templateColumns="repeat(2, 1fr)" gap={3}>
-                <NumberInput
+                <TimePicker
+                  className={"clock"}
+                  locale="fr-FR"
+                  minTime={"05:00:00"}
+                  value={workingHours[i].afternoon?.from || ""}
+                  disableClock={true}
+                  format={"HH:mm"}
                   onChange={(valueString) => {
                     setWorkingHours({
                       ...workingHours,
@@ -398,24 +388,19 @@ const Timesheet: React.FC<Props> = (props: Props) => {
                         ...workingHours[i],
                         afternoon: {
                           ...workingHours[i].afternoon,
-                          from: parse(valueString),
+                          from: valueString ? valueString.toString() : "00:00",
                         },
                       },
                     });
                   }}
-                  value={format(workingHours[i].afternoon?.from || "")}
-                  min={0}
-                  max={23}
-                  size="lg"
-                  allowMouseWheel
-                >
-                  <NumberInputField />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
-                </NumberInput>
-                <NumberInput
+                />
+                <TimePicker
+                  className={"clock"}
+                  locale="fr-FR"
+                  minTime={"05:00:00"}
+                  value={workingHours[i].afternoon?.to || ""}
+                  disableClock={true}
+                  format={"HH:mm"}
                   onChange={(valueString) => {
                     setWorkingHours({
                       ...workingHours,
@@ -423,23 +408,12 @@ const Timesheet: React.FC<Props> = (props: Props) => {
                         ...workingHours[i],
                         afternoon: {
                           ...workingHours[i].afternoon,
-                          to: parse(valueString),
+                          to: valueString ? valueString.toString() : "00:00",
                         },
                       },
                     });
                   }}
-                  value={format(workingHours[i].afternoon?.to || "")}
-                  min={0}
-                  max={23}
-                  size="lg"
-                  allowMouseWheel
-                >
-                  <NumberInputField />
-                  <NumberInputStepper>
-                    <NumberIncrementStepper />
-                    <NumberDecrementStepper />
-                  </NumberInputStepper>
-                </NumberInput>
+                />
               </Grid>
             </Box>
           </Box>

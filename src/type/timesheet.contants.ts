@@ -23,52 +23,52 @@ export interface ITimeSheetData {
 export const defaultState: IWeekDetails = {
   0: {
     morning: {
-      from: "8",
-      to: "12",
+      from: "08:00",
+      to: "12:00",
     },
     afternoon: {
-      from: "14",
-      to: "17",
+      from: "14:00",
+      to: "17:00",
     },
   },
   1: {
     morning: {
-      from: "8",
-      to: "12",
+      from: "08:00",
+      to: "12:00",
     },
     afternoon: {
-      from: "14",
-      to: "17",
+      from: "14:00",
+      to: "17:00",
     },
   },
   2: {
     morning: {
-      from: "8",
-      to: "12",
+      from: "08:00",
+      to: "12:00",
     },
     afternoon: {
-      from: "14",
-      to: "17",
+      from: "14:00",
+      to: "17:00",
     },
   },
   3: {
     morning: {
-      from: "8",
-      to: "12",
+      from: "08:00",
+      to: "12:00",
     },
     afternoon: {
-      from: "14",
-      to: "17",
+      from: "14:00",
+      to: "17:00",
     },
   },
   4: {
     morning: {
-      from: "8",
-      to: "12",
+      from: "08:00",
+      to: "12:00",
     },
     afternoon: {
-      from: "14",
-      to: "17",
+      from: "14:00",
+      to: "17:00",
     },
   },
 };

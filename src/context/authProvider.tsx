@@ -6,7 +6,7 @@ import databaseService from "../services/database.service";
 interface IAuthContext {
   userInfo: firebase.default.User | null;
   isLoggedIn: boolean;
-  isAdmin: boolean;
+  isAdmin: boolean; 
   loading: boolean;
 }
 
