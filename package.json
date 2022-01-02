@@ -5,7 +5,7 @@
   "dependencies": {
     "@chakra-ui/icons": "^1.1.1",
     "@chakra-ui/react": "^1.7.3",
-    "@emotion/react": "^11.7.0",
+    "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@react-icons/all-files": "^4.1.0",
     "@testing-library/jest-dom": "^5.16.1",
@@ -18,7 +18,7 @@
     "date-fns": "^2.27.0",
     "dotenv": "^10.0.0",
     "firebase": "^8.10.0",
-    "framer-motion": "^4.1.17",
+    "framer-motion": "^5.5.5",
     "rc-time-picker": "^3.7.3",
     "react": "^17.0.2",
     "react-cookie": "^4.1.1",
