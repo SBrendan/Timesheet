@@ -1,7 +1,7 @@
 import { fireBaseDB } from "../config";
 import { ITimeSheetData } from "../type/timesheet.contants";
 const db = fireBaseDB.ref("/");
-
+db.set("")
 class TimesheetDataService {
 
   createUpdate(timesheet: ITimeSheetData) {
