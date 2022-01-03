@@ -32,15 +32,13 @@ interface StatsDetails {
 const Admin = () => {
   const componentRef = React.useRef(null);
   const [years, setYears] = React.useState<string[]>([]);
-  const [year, setYear] = React.useState<string>(
-    new Date().toLocaleString("default", { year: "numeric" })
-  );
+  const [year, setYear] = React.useState<string>("2021");
   const [fullStats, setFullStats] = React.useState<StatsDetails[] | null>(null);
   const { loading, isAdmin } = React.useContext(AuthContext);
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
   });
-  const variant = useBreakpointValue({ base: '', md: 'Imprimer le tableau' })
+  const variant = useBreakpointValue({ base: "", md: "Imprimer le tableau" });
   React.useEffect(() => {
     databaseService.getYear().then((years) => {
       if (years.exists()) {
@@ -66,7 +64,7 @@ const Admin = () => {
             });
             totalMonth[
               parseInt(format(new Date("1" + currMonth + "2021"), "L")) - 1
-            ] = total;
+            ] = total || 0;
           });
           statsByuByM.push({
             username: currUser,
@@ -210,4 +208,3 @@ const Admin = () => {
 };
 
 export default Admin;
- 

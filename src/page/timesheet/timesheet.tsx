@@ -9,12 +9,14 @@ import {
   Spinner,
   Stack,
   Text,
+  useBreakpointValue,
   useToast
 } from "@chakra-ui/react";
 import {
   addHours,
   addWeeks,
-  differenceInHours, eachDayOfInterval,
+  differenceInHours,
+  eachDayOfInterval,
   endOfWeek,
   getISOWeek,
   getMonth,
@@ -39,6 +41,16 @@ import "./timesheet.css";
 interface Props {}
 
 const Timesheet: React.FC<Props> = (props: Props) => {
+  const btnSize = useBreakpointValue({ base: "xs", md: "" });
+  const btnContentNext = useBreakpointValue({
+    md: "Semaine suivante",
+    base: "Sem. suivante",
+  });
+  const btnContentPrevious = useBreakpointValue({
+    md: "Semaine passée",
+    base: "Sem. passée",
+  });
+
   const { userInfo } = React.useContext(AuthContext);
   const [workingHours, setWorkingHours] =
     React.useState<IWeekDetails>(defaultState);
@@ -74,10 +86,9 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         setIsFetchingDate(!setIsFetchingDate);
         setWorkingHours(snapshot.val().timesheetDetails);
       })
-      .catch((e) => {
+      .catch(() => {
         setIsFetchingDate(!setIsFetchingDate);
         setWorkingHours(defaultState);
-        console.error(e);
       });
   }, [week, startDay, userInfo]);
 
@@ -94,8 +105,8 @@ const Timesheet: React.FC<Props> = (props: Props) => {
             const d2 = new Date(currentYear + ", 11, 14");
             d1.setHours(parseInt(value.from.split(":")[0]));
             d2.setHours(parseInt(value.to.split(":")[0]));
-            d1.setMinutes(parseInt(value.from.split(":")[1]))
-            d2.setMinutes(parseInt(value.to.split(":")[1]))
+            d1.setMinutes(parseInt(value.from.split(":")[1]));
+            d2.setMinutes(parseInt(value.to.split(":")[1]));
             morningSum = differenceInHours(d2, d1);
           } else {
             const d1 = new Date(currentYear + ", 11, 14");
@@ -250,12 +261,22 @@ const Timesheet: React.FC<Props> = (props: Props) => {
           >
             <Stack>
               <ButtonGroup variant="outline">
-                <Button leftIcon={<FaArrowLeft />} onClick={() => prevWeek()}>
-                  Semaine passée
+                <Button
+                  size={btnSize}
+                  leftIcon={<FaArrowLeft />}
+                  onClick={() => prevWeek()}
+                >
+                  {btnContentPrevious}
                 </Button>
-                <Button onClick={() => curWeek()}>Semaine courante</Button>
-                <Button rightIcon={<FaArrowRight />} onClick={() => nextWeek()}>
-                  Semaine suivante
+                <Button size={btnSize} onClick={() => curWeek()}>
+                  Semaine courante
+                </Button>
+                <Button
+                  size={btnSize}
+                  rightIcon={<FaArrowRight />}
+                  onClick={() => nextWeek()}
+                >
+                  {btnContentNext}
                 </Button>
               </ButtonGroup>
               <Stack>
@@ -301,7 +322,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         day.toLocaleDateString("fr-FR", { weekday: "long" })
       );
       const dayNumber = ("0" + day.getDate()).slice(-2);
-      const monthNumber = ("0" + day.getMonth()).slice(-2);
+      const monthNumber = ("0" + day.getMonth() + 1).slice(-2);
       const result: any = [];
       if (i < 5) {
         day.setHours(0, 0, 0, 0);
@@ -320,7 +341,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
               fontSize={{ base: "xl", md: "lg" }}
               textAlign={"center"}
             >
-              {`${dayName} ${dayNumber}/${parseInt(monthNumber) + 1}`}
+              {`${dayName} ${dayNumber}/${monthNumber}`}
             </Text>
 
             <Box>
