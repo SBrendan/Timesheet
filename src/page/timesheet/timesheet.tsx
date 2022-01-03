@@ -13,9 +13,8 @@ import {
   useToast
 } from "@chakra-ui/react";
 import {
-  addHours,
   addWeeks,
-  differenceInHours,
+  differenceInMilliseconds,
   eachDayOfInterval,
   endOfWeek,
   getISOWeek,
@@ -41,7 +40,7 @@ import "./timesheet.css";
 interface Props {}
 
 const Timesheet: React.FC<Props> = (props: Props) => {
-  const btnSize = useBreakpointValue({ base: "xs", md: "md" });
+  const btnSize = useBreakpointValue({ base: "xs", md: "sm", "2xl": "md" });
   const btnContentNext = useBreakpointValue({
     md: "Semaine suivante",
     base: "Sem. suivante",
@@ -67,9 +66,9 @@ const Timesheet: React.FC<Props> = (props: Props) => {
     endOfWeek(date, { weekStartsOn: 1 })
   );
   const [minWeeks] = React.useState<number>(35);
-  const [totalWorkingHours, setTotalWorkingHours] = React.useState<number>(0);
+  const [totalWorkingHours, setTotalWorkingHours] = React.useState<string>("");
   const [totalAdditionalHours, setTotalAdditionalHours] =
-    React.useState<number>(0);
+    React.useState<string>("");
   const [isFetchingData, setIsFetchingDate] = React.useState<boolean>(false);
   const toast = useToast();
 
@@ -86,57 +85,63 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         setIsFetchingDate(!setIsFetchingDate);
         if (snapshot.exists()) {
           setWorkingHours(snapshot.val().timesheetDetails);
+        } else {
+          setWorkingHours(defaultState);
         }
       })
-      .catch((e) => {
+      .catch(() => {
+        console.log("cce")
         setIsFetchingDate(!setIsFetchingDate);
         setWorkingHours(defaultState);
-        console.log(e);
       });
+      console.log("fetch")
   }, [week, startDay, userInfo]);
 
   React.useEffect(() => {
-    const sumHoursOfWeek = (): number => {
+    const sumHoursOfWeek = (): string => {
       let total = 0;
       Object.keys(workingHours).forEach((k) => {
         let totalDay = 0;
         Object.entries(workingHours[parseInt(k)]).forEach(([key, value]) => {
           let morningSum = 0;
           let afternoonSum = 0;
+          const d1 = new Date(currentYear + "-11-14");
+          const d2 = new Date(currentYear + "-11-14");
+          d1.setHours(parseInt(value.from.split(":")[0]));
+          d2.setHours(parseInt(value.to.split(":")[0]));
+          d1.setMinutes(parseInt(value.from.split(":")[1]));
+          d2.setMinutes(parseInt(value.to.split(":")[1]));
           if (key === "morning") {
-            const d1 = new Date(currentYear + ", 11, 14");
-            const d2 = new Date(currentYear + ", 11, 14");
-            d1.setHours(parseInt(value.from.split(":")[0]));
-            d2.setHours(parseInt(value.to.split(":")[0]));
-            d1.setMinutes(parseInt(value.from.split(":")[1]));
-            d2.setMinutes(parseInt(value.to.split(":")[1]));
-            morningSum = differenceInHours(d2, d1);
+            morningSum = differenceInMilliseconds(d2, d1);
           } else {
-            const d1 = new Date(currentYear + ", 11, 14");
-            const d2 = new Date(currentYear + ", 11, 14");
-            d1.setHours(parseInt(value.from));
-            d2.setHours(parseInt(value.to));
-            afternoonSum = differenceInHours(d2, d1);
+            afternoonSum = differenceInMilliseconds(d2, d1);
           }
           totalDay += morningSum + afternoonSum;
         });
         total += totalDay;
       });
-      return total;
+      const hour = Math.floor(total / 1000 / 60 / 60);
+      const minutes = Math.floor((total / 1000 / 60 / 60 - hour) * 60);
+      return hour + ":" + ("0" + minutes).slice(-2);
     };
     setTotalWorkingHours(sumHoursOfWeek());
   }, [workingHours, currentYear]);
 
   React.useEffect(() => {
     const sumAdditionalHour = () => {
-      const d1 = addHours(
-        new Date(currentYear + ", 11, 14"),
-        totalWorkingHours
-      );
-      const d2 = addHours(new Date(currentYear + ", 11, 14"), minWeeks);
-      return differenceInHours(d1, d2);
+      const d1 = new Date(currentYear + "-11-14");
+      d1.setHours(parseInt(totalWorkingHours.split(":")[0]));
+      d1.setMinutes(parseInt(totalWorkingHours.split(":")[1]));
+      const d2 = new Date(currentYear + "-11-14");
+      d2.setHours(minWeeks);
+      d2.setMinutes(0);
+      return differenceInMilliseconds(d1, d2);
     };
-    setTotalAdditionalHours(sumAdditionalHour());
+    const hour = Math.floor(sumAdditionalHour() / 1000 / 60 / 60);
+    const minutes = Math.floor(
+      (sumAdditionalHour() / 1000 / 60 / 60 - hour) * 60
+    );
+    setTotalAdditionalHours(hour + ":" + ("0" + minutes).slice(-2));
   }, [totalWorkingHours, minWeeks, currentYear]);
 
   const changeWeek = (newDate: Date) => {
@@ -176,11 +181,9 @@ const Timesheet: React.FC<Props> = (props: Props) => {
       year: startDay.toLocaleDateString("default", { year: "numeric" }),
       timesheetDetails: workingHours,
     };
-    console.log("avant")
     timesheetService
       .createUpdate(data)
       .then(() => {
-        console.log("coucou")
         toast({
           title: "Enregistrement réussi",
           description: `Semaine n°${week} sauvegardée`,
@@ -189,7 +192,6 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         });
       })
       .catch((e: Error) => {
-        console.log("coucou")
         toast({
           title: `Erreur lors de l'enregistrement`,
           description: `Une erreur inatendue, veuillez réesayer ou contacter l'administrateur`,
@@ -232,12 +234,20 @@ const Timesheet: React.FC<Props> = (props: Props) => {
             />
             <StatsCard
               title={"Heures Réalisées"}
-              stat={totalWorkingHours + "h"}
+              stat={
+                totalWorkingHours.split(":")[0] +
+                "h" +
+                totalWorkingHours.split(":")[1]
+              }
               icon={<FcPlanner size={"3em"} />}
             />
             <StatsCard
               title={"Heures Suplémentaires"}
-              stat={totalAdditionalHours + "h"}
+              stat={
+                totalAdditionalHours.split(":")[0] +
+                "h" +
+                totalAdditionalHours.split(":")[1]
+              }
               icon={<FcOvertime size={"3em"} />}
             />
           </SimpleGrid>
@@ -468,7 +478,11 @@ const Timesheet: React.FC<Props> = (props: Props) => {
 
         <Box>
           <Grid
-            templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(5, 1fr)" }}
+            templateColumns={{
+              base: "repeat(1, 1fr)",
+              md: "repeat(3, 1fr)",
+              "2xl": "repeat(5, 1fr)",
+            }}
             gap={{ base: 0, md: 9 }}
           >
             {result}

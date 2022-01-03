@@ -14,7 +14,7 @@ import {
   Tr,
   useBreakpointValue
 } from "@chakra-ui/react";
-import { format } from "date-fns";
+import { differenceInMilliseconds, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import * as React from "react";
 import { FaPrint } from "react-icons/fa";
@@ -22,7 +22,7 @@ import { Navigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { AuthContext } from "../../context/authProvider";
 import databaseService from "../../services/database.service";
-import { titleCase } from "../../utils/string";
+import { convertMsToHMstring, titleCase } from "../../utils/string";
 import "./admin.css";
 interface StatsDetails {
   username: string;
@@ -60,10 +60,16 @@ const Admin = () => {
             let total: number = 0;
             const currMonth = months.key;
             months.forEach((statsByU) => {
-              total += parseInt(statsByU.val().totalAdditionalHours);
+              const d1 = new Date("2022-11-14");
+              const d2 = new Date("2022-11-14");
+              d1.setHours(statsByU.val().totalAdditionalHours.split(":")[0]);
+              d1.setMinutes(statsByU.val().totalAdditionalHours.split(":")[1]);
+              d2.setHours(0);
+              d2.setMinutes(0);
+              total += differenceInMilliseconds(d1, d2);
             });
             totalMonth[
-              parseInt(format(new Date("1" + currMonth + "2021"), "L")) - 1
+              parseInt(format(new Date("1-" + currMonth + "-2021"), "L")) - 1
             ] = total || 0;
           });
           statsByuByM.push({
@@ -89,9 +95,13 @@ const Admin = () => {
               <Tr key={i}>
                 <Td>{titleCase(val.username)}</Td>
                 {val.months.map((details) => {
-                  return details ? <Td>{details} Heures</Td> : <Td>-</Td>;
+                  return details ? (
+                    <Td>{convertMsToHMstring(details)}</Td>
+                  ) : (
+                    <Td>-</Td>
+                  );
                 })}
-                <Td>{val.months.reduce((a, b) => a + b)} Heures</Td>
+                <Td>{convertMsToHMstring(val.months.reduce((a, b) => a + b))}</Td>
               </Tr>
             );
           }
@@ -99,9 +109,13 @@ const Admin = () => {
             <tr key={i}>
               <td>{titleCase(val.username)}</td>
               {val.months.map((details) => {
-                return details ? <td>{details}h</td> : <td>-</td>;
+                return details ? (
+                  <td>{convertMsToHMstring(details)}h</td>
+                ) : (
+                  <td>-</td>
+                );
               })}
-              <td>{val.months.reduce((a, b) => a + b)}h</td>
+              <td>{convertMsToHMstring(val.months.reduce((a, b) => a + b))}</td>
             </tr>
           );
         })

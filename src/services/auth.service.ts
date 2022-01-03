@@ -16,9 +16,7 @@ class AuthService {
   signOut() {
     auth
       .signOut()
-      .then(() => {
-        console.log("logged out");
-      })
+      .then()
       .catch((e) => {
         console.error(e);
       });

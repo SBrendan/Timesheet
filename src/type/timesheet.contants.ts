@@ -16,7 +16,7 @@ export interface ITimeSheetData {
   weekNumber: number;
   month: string;
   year: string;
-  totalAdditionalHours: number;
+  totalAdditionalHours: string;
   timesheetDetails: IWeekDetails;
 }
 
