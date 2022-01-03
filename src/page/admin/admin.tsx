@@ -32,7 +32,7 @@ interface StatsDetails {
 const Admin = () => {
   const componentRef = React.useRef(null);
   const [years, setYears] = React.useState<string[]>([]);
-  const [year, setYear] = React.useState<string>("2021");
+  const [year, setYear] = React.useState<string>(new Date().toLocaleString("default", { year: "numeric" }));
   const [fullStats, setFullStats] = React.useState<StatsDetails[] | null>(null);
   const { loading, isAdmin } = React.useContext(AuthContext);
   const handlePrint = useReactToPrint({
