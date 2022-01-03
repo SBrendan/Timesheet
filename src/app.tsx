@@ -1,4 +1,4 @@
-import { Box, ChakraProvider, theme } from "@chakra-ui/react";
+import { Box, ChakraProvider } from "@chakra-ui/react";
 import * as React from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { AuthContext, AuthProvider } from "./context/authProvider";
@@ -17,7 +17,7 @@ const PrivateRoute = () => {
 };
 
 export const App = () => (
-  <ChakraProvider theme={theme}>
+  <ChakraProvider>
     <AuthProvider>
         <SimpleSidebar>
           <Box>
