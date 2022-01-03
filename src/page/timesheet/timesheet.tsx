@@ -41,7 +41,7 @@ import "./timesheet.css";
 interface Props {}
 
 const Timesheet: React.FC<Props> = (props: Props) => {
-  const btnSize = useBreakpointValue({ base: "xs", md: "" });
+  const btnSize = useBreakpointValue({ base: "xs", md: "md" });
   const btnContentNext = useBreakpointValue({
     md: "Semaine suivante",
     base: "Sem. suivante",
