@@ -1,38 +1,27 @@
-import { fireBaseDB } from "../config";
+import { child, get, getDatabase, ref, set } from "firebase/database";
+import { app } from "../config";
 import { ITimeSheetData } from "../type/timesheet.contants";
-const db = fireBaseDB.ref("/");
-db.set("")
-class TimesheetDataService {
+const db = ref(getDatabase(app));
 
+class TimesheetDataService {
   createUpdate(timesheet: ITimeSheetData) {
-    const timesheetsRef = db.child("timesheets/" +timesheet.year );
-    return timesheetsRef
-      .child(timesheet.username) 
-      .child(timesheet.month)
-      .child(timesheet.key +"" || "")
-      .set({
-        ...timesheet,
-      });
+    return set(child(db, "timesheets/" + timesheet.year + "/" + timesheet.username + "/" + timesheet.month + "/" + timesheet.key +"" || ""), timesheet);
   }
 
   getByKey(username: string, year: string, month: string, key: string) {
-    const timesheetsRef = db.child("timesheets/" + year);
-    return timesheetsRef.child(username).child(month).child(key).once("value");
-  }
-
-  getUser(key: string) {
-    const userRef = db.child("users/");
-    return userRef.child(key).once("value");
+    return get(child(db, "timesheets/" + year + "/" + username + "/" + month +"/" + key));
   }
 
   getYear() {
-    const timesheetsRef = db.child("timesheets/");
-    return timesheetsRef.once("value");
+    return get(child(db, "timesheets/"));
   }
 
   getStats(year: string) {
-    const timesheetsRef = db.child("timesheets/" + year);
-    return timesheetsRef.once("value");
+    return get(child(db,"timesheets/" + year));
+  }
+
+  getUser(key: string) {
+    return get(child(db, "users/" + key));
   }
 }
 

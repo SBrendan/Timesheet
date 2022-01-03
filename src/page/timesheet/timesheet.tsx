@@ -84,11 +84,14 @@ const Timesheet: React.FC<Props> = (props: Props) => {
       )
       .then((snapshot) => {
         setIsFetchingDate(!setIsFetchingDate);
-        setWorkingHours(snapshot.val().timesheetDetails);
+        if (snapshot.exists()) {
+          setWorkingHours(snapshot.val().timesheetDetails);
+        }
       })
-      .catch(() => {
+      .catch((e) => {
         setIsFetchingDate(!setIsFetchingDate);
         setWorkingHours(defaultState);
+        console.log(e);
       });
   }, [week, startDay, userInfo]);
 
@@ -173,10 +176,11 @@ const Timesheet: React.FC<Props> = (props: Props) => {
       year: startDay.toLocaleDateString("default", { year: "numeric" }),
       timesheetDetails: workingHours,
     };
-
+    console.log("avant")
     timesheetService
       .createUpdate(data)
       .then(() => {
+        console.log("coucou")
         toast({
           title: "Enregistrement réussi",
           description: `Semaine n°${week} sauvegardée`,
@@ -185,6 +189,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         });
       })
       .catch((e: Error) => {
+        console.log("coucou")
         toast({
           title: `Erreur lors de l'enregistrement`,
           description: `Une erreur inatendue, veuillez réesayer ou contacter l'administrateur`,

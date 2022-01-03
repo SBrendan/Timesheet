@@ -1,10 +1,16 @@
-import { fireAuth } from "../config";
+import {
+  getAuth,
+  sendPasswordResetEmail,
+  signInWithEmailAndPassword,
+  updateProfile
+} from "firebase/auth";
+import { app } from "../config";
 
-const auth = fireAuth;
+const auth = getAuth(app);
 
 class AuthService {
   signIn = (email: string, password: string) => {
-    return auth.signInWithEmailAndPassword(email, password);
+    return signInWithEmailAndPassword(auth, email, password);
   };
 
   signOut() {
@@ -19,15 +25,16 @@ class AuthService {
   }
 
   resetPassword(email: string) {
-    return auth.sendPasswordResetEmail(email);
+    return sendPasswordResetEmail(auth, email);
   }
-  
 
   updateProfile(name: string) {
-    return auth.currentUser?.updateProfile({
-      displayName: name});
+    if (auth.currentUser) {
+      return updateProfile(auth.currentUser, {
+        displayName: name,
+      });
+    }
   }
-
 }
 
 export default new AuthService();

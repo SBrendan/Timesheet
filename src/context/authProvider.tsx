@@ -1,12 +1,13 @@
 import { Flex, Stack } from "@chakra-ui/react";
+import { getAuth, onAuthStateChanged, User } from "firebase/auth";
 import * as React from "react";
 import { PuffLoader } from "react-spinners";
-import { fireAuth } from "../config";
+import { app } from "../config";
 import databaseService from "../services/database.service";
 interface IAuthContext {
-  userInfo: firebase.default.User | null;
+  userInfo: User | null;
   isLoggedIn: boolean;
-  isAdmin: boolean; 
+  isAdmin: boolean;
   loading: boolean;
 }
 
@@ -26,12 +27,12 @@ export const AuthProvider: React.FC = ({ children }) => {
   });
 
   React.useEffect(() => {
-    const unsubscribe = fireAuth.onAuthStateChanged((firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(getAuth(app), (firebaseUser) => {
       if (firebaseUser) {
         firebaseUser.getIdTokenResult().then((user) => {
           if (user.claims.user_id) {
             databaseService
-              .getUser(user.claims.user_id)
+              .getUser(user.claims.user_id.toString())
               .then((admin) => {
                 const isAdmin = admin.val()
                   ? admin.val().admin
