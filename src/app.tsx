@@ -29,7 +29,7 @@ export const App = () => (
                 <Route path="/" element={<Home />} />
                 <Route path="/saisie" element={<Timesheet />} />
                 <Route path="/admin" element={<Admin />} />
-                <Route path="/profile" element={<Profil />} />
+                <Route path="/profil" element={<Profil />} />
               </Route>
             </Routes>
           </Box>
