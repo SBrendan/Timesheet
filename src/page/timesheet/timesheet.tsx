@@ -176,6 +176,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
     const data: ITimeSheetData = {
       key: startDay.getTime(),
       username: snakeCase(userInfo?.displayName || ""),
+      displayName: userInfo?.displayName || "",
       month: startDay.toLocaleDateString("en-US", { month: "long" }),
       weekNumber: week,
       totalAdditionalHours: totalAdditionalHours,

@@ -13,6 +13,7 @@ export interface HoursDetail {
 export interface ITimeSheetData {
   key?: number | null;
   username: string;
+  displayName: string;
   weekNumber: number;
   month: string;
   year: string;

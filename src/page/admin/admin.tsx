@@ -22,10 +22,11 @@ import { Navigate } from "react-router-dom";
 import { useReactToPrint } from "react-to-print";
 import { AuthContext } from "../../context/authProvider";
 import databaseService from "../../services/database.service";
-import { convertMsToHMstring, titleCase } from "../../utils/string";
+import { convertMsToHMstring } from "../../utils/string";
 import "./admin.css";
 interface StatsDetails {
   username: string;
+  displayName: string;
   months: number[];
 }
 
@@ -52,6 +53,7 @@ const Admin = () => {
       const statsByuByM: StatsDetails[] = [];
       if (stats.exists()) {
         let currUser = "";
+        let displayName = "";
         stats.forEach((users) => {
           let totalMonth: number[] = [];
           totalMonth = Array(12).fill(0);
@@ -60,6 +62,7 @@ const Admin = () => {
             let total: number = 0;
             const currMonth = months.key;
             months.forEach((statsByU) => {
+              displayName = statsByU.val().displayName;
               const d1 = new Date("2022-11-14");
               const d2 = new Date("2022-11-14");
               d1.setHours(statsByU.val().totalAdditionalHours.split(":")[0]);
@@ -75,6 +78,7 @@ const Admin = () => {
           statsByuByM.push({
             username: currUser,
             months: totalMonth,
+            displayName: displayName,
           });
         });
       }
@@ -93,7 +97,7 @@ const Admin = () => {
           if (type === "default") {
             return (
               <Tr key={i}>
-                <Td>{titleCase(val.username)}</Td>
+                <Td>{val.displayName}</Td>
                 {val.months.map((details) => {
                   return details ? (
                     <Td>{convertMsToHMstring(details)}</Td>
@@ -107,7 +111,7 @@ const Admin = () => {
           }
           return (
             <tr key={i}>
-              <td>{titleCase(val.username)}</td>
+              <td>{val.displayName}</td>
               {val.months.map((details) => {
                 return details ? (
                   <td>{convertMsToHMstring(details)}h</td>
