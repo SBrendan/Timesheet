@@ -4,12 +4,20 @@ import {
   ButtonGroup,
   Grid,
   Icon,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Select,
   SimpleGrid,
   Spinner,
   Stack,
   Text,
   useBreakpointValue,
+  useDisclosure,
   useToast
 } from "@chakra-ui/react";
 import {
@@ -26,6 +34,7 @@ import { fr } from "date-fns/locale";
 import * as React from "react";
 import { FaArrowLeft, FaArrowRight, FaCoffee, FaSave } from "react-icons/fa";
 import { FcClock, FcOvertime, FcPlanner } from "react-icons/fc";
+import { Navigate } from "react-router-dom";
 import TimePicker from "react-time-picker";
 import StatsCard from "../../component/statsCard";
 import { AuthContext } from "../../context/authProvider";
@@ -50,8 +59,8 @@ const Timesheet: React.FC<Props> = (props: Props) => {
     md: "Semaine passée",
     base: "Sem. passée",
   });
-
-  const { userInfo } = React.useContext(AuthContext);
+  const { isOpen, onClose, onOpen } = useDisclosure();
+  const { userInfo, loading } = React.useContext(AuthContext);
   const [workingHours, setWorkingHours] =
     React.useState<IWeekDetails>(defaultState);
   const [now] = React.useState<Date>(new Date());
@@ -91,11 +100,9 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         }
       })
       .catch(() => {
-        console.log("cce")
         setIsFetchingDate(!setIsFetchingDate);
         setWorkingHours(defaultState);
       });
-      console.log("fetch")
   }, [week, startDay, userInfo]);
 
   React.useEffect(() => {
@@ -144,6 +151,10 @@ const Timesheet: React.FC<Props> = (props: Props) => {
     );
     setTotalAdditionalHours(hour + ":" + ("0" + minutes).slice(-2));
   }, [totalWorkingHours, minWeeks, currentYear]);
+
+  if (!loading && !userInfo?.displayName) {
+    return <Navigate to="/profil" />;
+  }
 
   const changeWeek = (newDate: Date) => {
     setDate(newDate);
@@ -202,6 +213,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         });
         console.error(e);
       });
+      onClose()
   };
 
   const generateWeeklyStats = (): React.ReactElement => {
@@ -491,7 +503,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
           </Grid>
         </Box>
         <Button
-          onClick={() => saveTimeSheet()}
+          onClick={onOpen}
           colorScheme={"teal"}
           rightIcon={<FaSave />}
         >
@@ -515,6 +527,24 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         {generateWeeklyAction()}
         {generateWeeklyStats()}
         {generateDays()}
+        <Modal isOpen={isOpen} onClose={onClose}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Accord du salarié</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              En validant, vous sousigné que les heures réalisés et entrer sur
+              cette outils sont vrai. En cas de détéctions de déclarations
+              froduleuse, des sanctions pourront être appliqué à votre encontre.
+            </ModalBody>
+            <ModalFooter>
+              <Button colorScheme="red" variant="ghost" mr={3} onClick={onClose}>
+                Refuser
+              </Button>
+              <Button rightIcon={<FaSave />}  color={"teal"} onClick={() => saveTimeSheet()}>Enregistrer</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
       </Box>
     );
   };

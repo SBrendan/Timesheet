@@ -33,7 +33,9 @@ interface StatsDetails {
 const Admin = () => {
   const componentRef = React.useRef(null);
   const [years, setYears] = React.useState<string[]>([]);
-  const [year, setYear] = React.useState<string>(new Date().toLocaleString("default", { year: "numeric" }));
+  const [year, setYear] = React.useState<string>(
+    new Date().toLocaleString("default", { year: "numeric" })
+  );
   const [fullStats, setFullStats] = React.useState<StatsDetails[] | null>(null);
   const { loading, isAdmin } = React.useContext(AuthContext);
   const handlePrint = useReactToPrint({
@@ -97,7 +99,7 @@ const Admin = () => {
           if (type === "default") {
             return (
               <Tr key={i}>
-                <Td>{val.displayName}</Td>
+                <Td>{val.displayName || val.username}</Td>
                 {val.months.map((details) => {
                   return details ? (
                     <Td>{convertMsToHMstring(details)}</Td>
@@ -105,13 +107,15 @@ const Admin = () => {
                     <Td>-</Td>
                   );
                 })}
-                <Td>{convertMsToHMstring(val.months.reduce((a, b) => a + b))}</Td>
+                <Td>
+                  {convertMsToHMstring(val.months.reduce((a, b) => a + b))}
+                </Td>
               </Tr>
             );
           }
           return (
             <tr key={i}>
-              <td>{val.displayName}</td>
+              <td>{val.displayName || val.username}</td>
               {val.months.map((details) => {
                 return details ? (
                   <td>{convertMsToHMstring(details)}h</td>

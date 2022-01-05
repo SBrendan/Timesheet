@@ -1,25 +1,28 @@
 import {
-    Box,
-    Button,
-    Flex,
-    Input,
-    Stack,
-    Text,
-    useToast
+  Box,
+  Button,
+  Flex,
+  Input,
+  Stack,
+  Text,
+  useToast
 } from "@chakra-ui/react";
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 import authService from "../../services/auth.service";
 
 const Profil = () => {
   const [name, setName] = React.useState<string>("");
   const toast = useToast();
+  const navigate = useNavigate();
   const updateName = () => {
     authService.updateProfile(name)?.then((e) => {
       toast({
-        title: "Changement de nom",
+        title: "Changement de nom avec succès",
         status: "success",
       });
     });
+    navigate("/");
   };
 
   return (
@@ -40,6 +43,7 @@ const Profil = () => {
           <Input
             type={"text"}
             onChange={(val) => setName(val.target.value)}
+            placeholder="Prénom Nom"
             defaultValue={name}
           />
           <Button onClick={() => updateName()}>Valider</Button>
