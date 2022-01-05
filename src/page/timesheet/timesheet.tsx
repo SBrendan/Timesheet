@@ -533,9 +533,9 @@ const Timesheet: React.FC<Props> = (props: Props) => {
             <ModalHeader>Accord du salarié</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              En validant, vous sousigné que les heures réalisés et entrer sur
-              cette outils sont vrai. En cas de détéctions de déclarations
-              froduleuse, des sanctions pourront être appliqué à votre encontre.
+              En cliquant sur le bouton valider, vous attestez que les heures entrées sur
+              cet outil sont vraies. En cas de déclaration 
+              frauduleuse, des sanctions pourront être appliquées à votre encontre.
             </ModalBody>
             <ModalFooter>
               <Button colorScheme="red" variant="ghost" mr={3} onClick={onClose}>
