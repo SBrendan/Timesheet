@@ -31,6 +31,7 @@ import StatsCard from "../../component/statsCard";
 import { AuthContext } from "../../context/authProvider";
 import timesheetService from "../../services/database.service";
 import {
+  defaultHoursWeek,
   defaultState,
   ITimeSheetData,
   IWeekDetails
@@ -65,7 +66,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
   const [endDay, setEndDay] = React.useState<Date>(
     endOfWeek(date, { weekStartsOn: 1 })
   );
-  const [minWeeks] = React.useState<number>(35);
+  const [minWeeks] = React.useState<number>(defaultHoursWeek);
   const [totalWorkingHours, setTotalWorkingHours] = React.useState<string>("");
   const [totalAdditionalHours, setTotalAdditionalHours] =
     React.useState<string>("");

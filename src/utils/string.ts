@@ -4,6 +4,8 @@ export function capitalize(str: string): string {
 
 export function snakeCase(str: string): string {
   return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/\W+/g, " ")
     .split(/ |\B(?=[A-Z])/)
     .map((word) => word.toLowerCase())

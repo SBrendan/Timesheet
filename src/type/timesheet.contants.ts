@@ -20,6 +20,8 @@ export interface ITimeSheetData {
   timesheetDetails: IWeekDetails;
 }
 
+export const defaultHoursWeek: number = 39;
+
 export const defaultState: IWeekDetails = {
   0: {
     morning: {
@@ -27,7 +29,7 @@ export const defaultState: IWeekDetails = {
       to: "12:00",
     },
     afternoon: {
-      from: "14:00",
+      from: "13:00",
       to: "17:00",
     },
   },
@@ -37,7 +39,7 @@ export const defaultState: IWeekDetails = {
       to: "12:00",
     },
     afternoon: {
-      from: "14:00",
+      from: "13:00",
       to: "17:00",
     },
   },
@@ -47,7 +49,7 @@ export const defaultState: IWeekDetails = {
       to: "12:00",
     },
     afternoon: {
-      from: "14:00",
+      from: "13:00",
       to: "17:00",
     },
   },
@@ -57,7 +59,7 @@ export const defaultState: IWeekDetails = {
       to: "12:00",
     },
     afternoon: {
-      from: "14:00",
+      from: "13:00",
       to: "17:00",
     },
   },
@@ -67,8 +69,8 @@ export const defaultState: IWeekDetails = {
       to: "12:00",
     },
     afternoon: {
-      from: "14:00",
-      to: "17:00",
+      from: "13:00",
+      to: "16:00",
     },
   },
 };
