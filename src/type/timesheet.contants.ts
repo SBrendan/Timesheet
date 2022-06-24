@@ -19,6 +19,7 @@ export interface ITimeSheetData {
   year: string;
   totalAdditionalHours: string;
   timesheetDetails: IWeekDetails;
+  totalAdditionalHoursMajored: string;
 }
 
 export const defaultHoursWeek: number = 39;

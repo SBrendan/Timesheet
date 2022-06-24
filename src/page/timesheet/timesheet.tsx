@@ -47,6 +47,10 @@ import {
 } from "../../type/timesheet.contants";
 import { capitalize, snakeCase } from "../../utils/string";
 import "./timesheet.css";
+
+const minMajoredHours = 44;
+const maxMajoredHours = 48;
+const maxAuthorizedMajoredhours = "5";
 interface Props {}
 
 const Timesheet: React.FC<Props> = (props: Props) => {
@@ -183,6 +187,18 @@ const Timesheet: React.FC<Props> = (props: Props) => {
     changeWeek(new Date(date.getFullYear(), parseInt(selectedMonth), 1));
   };
 
+  const detectIfMajoredHours = (total: string): string => {
+    let majoredHours = "0";
+    if (parseInt(total) >= minMajoredHours) {
+      if (maxMajoredHours - parseInt(total) < 0) {
+        majoredHours = maxAuthorizedMajoredhours;
+      } else {
+        majoredHours = (Math.abs(parseInt(total) - minMajoredHours) + 1).toString();
+      }
+    }
+    return majoredHours;
+  };
+
   const saveTimeSheet = () => {
     const data: ITimeSheetData = {
       key: startDay.getTime(),
@@ -191,6 +207,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
       month: startDay.toLocaleDateString("en-US", { month: "long" }),
       weekNumber: week,
       totalAdditionalHours: totalAdditionalHours,
+      totalAdditionalHoursMajored: detectIfMajoredHours(totalAdditionalHours),
       year: startDay.toLocaleDateString("default", { year: "numeric" }),
       timesheetDetails: workingHours,
     };
@@ -213,7 +230,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
         });
         console.error(e);
       });
-      onClose()
+    onClose();
   };
 
   const generateWeeklyStats = (): React.ReactElement => {
@@ -502,11 +519,7 @@ const Timesheet: React.FC<Props> = (props: Props) => {
             {result}
           </Grid>
         </Box>
-        <Button
-          onClick={onOpen}
-          colorScheme={"teal"}
-          rightIcon={<FaSave />}
-        >
+        <Button onClick={onOpen} colorScheme={"teal"} rightIcon={<FaSave />}>
           Enregistrer
         </Button>
       </Stack>
@@ -533,15 +546,27 @@ const Timesheet: React.FC<Props> = (props: Props) => {
             <ModalHeader>Accord du salarié</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              En cliquant sur le bouton valider, vous attestez que les heures entrées sur
-              cet outil sont vraies. En cas de déclaration 
-              frauduleuse, des sanctions pourront être appliquées à votre encontre.
+              En cliquant sur le bouton valider, vous attestez que les heures
+              entrées sur cet outil sont vraies. En cas de déclaration
+              frauduleuse, des sanctions pourront être appliquées à votre
+              encontre.
             </ModalBody>
             <ModalFooter>
-              <Button colorScheme="red" variant="ghost" mr={3} onClick={onClose}>
+              <Button
+                colorScheme="red"
+                variant="ghost"
+                mr={3}
+                onClick={onClose}
+              >
                 Refuser
               </Button>
-              <Button rightIcon={<FaSave />}  color={"teal"} onClick={() => saveTimeSheet()}>Enregistrer</Button>
+              <Button
+                rightIcon={<FaSave />}
+                color={"teal"}
+                onClick={() => saveTimeSheet()}
+              >
+                Enregistrer
+              </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
