@@ -20,6 +20,5 @@ export function titleCase(str: string): string {
 
 export function convertMsToHMstring(ms: number): string {
   const hour = Math.floor(ms / 1000 / 60 / 60);
-  const minutes = Math.floor((ms / 1000 / 60 / 60 - hour) * 60);
-  return hour + "h" + ("0" + minutes).slice(-2);
+  return hour + "h";
 }

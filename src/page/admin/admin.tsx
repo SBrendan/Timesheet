@@ -11,6 +11,7 @@ import {
   Text,
   Th,
   Thead,
+  Tooltip,
   Tr,
   useBreakpointValue
 } from "@chakra-ui/react";
@@ -27,7 +28,10 @@ import "./admin.css";
 interface StatsDetails {
   username: string;
   displayName: string;
-  months: number[];
+  months: {
+    additional: number[];
+    totalMajored: number[];
+  };
 }
 
 const Admin = () => {
@@ -56,9 +60,12 @@ const Admin = () => {
       if (stats.exists()) {
         let currUser = "";
         let displayName = "";
+        let totalMajored = "";
         stats.forEach((users) => {
           let totalMonth: number[] = [];
+          let totalMajoredMonth: number[] = [];
           totalMonth = Array(12).fill(0);
+          totalMajoredMonth = Array(12).fill(0);
           currUser = users.key || "";
           users.forEach((months) => {
             let total: number = 0;
@@ -72,14 +79,21 @@ const Admin = () => {
               d2.setHours(0);
               d2.setMinutes(0);
               total += differenceInMilliseconds(d1, d2);
+              totalMajored = statsByU.val().totalAdditionalHoursMajored;
             });
             totalMonth[
               parseInt(format(new Date("1-" + currMonth + "-2021"), "L")) - 1
             ] = total || 0;
+            totalMajoredMonth[
+              parseInt(format(new Date("1-" + currMonth + "-2021"), "L")) - 1
+            ] = parseInt(totalMajored) || 0;
           });
           statsByuByM.push({
             username: currUser,
-            months: totalMonth,
+            months: {
+              additional: totalMonth,
+              totalMajored: totalMajoredMonth,
+            },
             displayName: displayName,
           });
         });
@@ -87,9 +101,31 @@ const Admin = () => {
       setFullStats(statsByuByM);
     });
   }, [year]);
+
   if (!loading && !isAdmin) {
     return <Navigate to="/" />;
   }
+
+  const generateValue = (months: any) => {
+    return months.additional.map((details: number, key: number) => {
+      return details || months.totalMajored[key] ? (
+        <td key={key}>
+          <Tooltip label="Le taux de majoration des heures supplémentaires est de 25 % pour les 8 premières heures effectuées, c'est-à-dire entre la 36e heure et la 43e heure.">
+            <Text fontSize={{ base: "xl", md: "xl" }} fontWeight="700">
+              {convertMsToHMstring(details)}
+            </Text>
+          </Tooltip>
+          <Tooltip label="Le taux de majoration des heures supplémentaires est de 50 % pour les heures suivantes, c'est-à-dire entre la 44e heure et la 48e heure.">
+            <Text fontSize={{ base: "sm", md: "sm" }} fontWeight="500">
+              Majoré {months.totalMajored[key]}h
+            </Text>
+          </Tooltip>
+        </td>
+      ) : (
+        <td key={key}>-</td>
+      );
+    });
+  };
 
   const generateTable = (type: string) => {
     const tableRow: any[] = [];
@@ -100,15 +136,11 @@ const Admin = () => {
             return (
               <Tr key={i}>
                 <Td>{val.displayName || val.username}</Td>
-                {val.months.map((details) => {
-                  return details ? (
-                    <Td>{convertMsToHMstring(details)}</Td>
-                  ) : (
-                    <Td>-</Td>
-                  );
-                })}
+                {generateValue(val.months)}
                 <Td>
-                  {convertMsToHMstring(val.months.reduce((a, b) => a + b))}
+                  {convertMsToHMstring(
+                    val.months.additional.reduce((a, b) => a + b)
+                  )}
                 </Td>
               </Tr>
             );
@@ -116,14 +148,12 @@ const Admin = () => {
           return (
             <tr key={i}>
               <td>{val.displayName || val.username}</td>
-              {val.months.map((details) => {
-                return details ? (
-                  <td>{convertMsToHMstring(details)}h</td>
-                ) : (
-                  <td>-</td>
-                );
-              })}
-              <td>{convertMsToHMstring(val.months.reduce((a, b) => a + b))}</td>
+              {generateValue(val.months)}
+              <td>
+                {convertMsToHMstring(
+                  val.months.additional.reduce((a, b) => a + b)
+                )}
+              </td>
             </tr>
           );
         })
