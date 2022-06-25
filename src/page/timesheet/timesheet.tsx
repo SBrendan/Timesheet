@@ -48,9 +48,9 @@ import {
 import { capitalize, snakeCase } from "../../utils/string";
 import "./timesheet.css";
 
-const minMajoredHours = 44;
-const maxMajoredHours = 48;
-const maxAuthorizedMajoredhours = "5";
+const minMajoredHours = 5;
+const maxMajoredHours = 10;
+const maxAuthorizedMajoredHours = "5";
 interface Props {}
 
 const Timesheet: React.FC<Props> = (props: Props) => {
@@ -190,8 +190,8 @@ const Timesheet: React.FC<Props> = (props: Props) => {
   const detectIfMajoredHours = (total: string): string => {
     let majoredHours = "0";
     if (parseInt(total) >= minMajoredHours) {
-      if (maxMajoredHours - parseInt(total) < 0) {
-        majoredHours = maxAuthorizedMajoredhours;
+      if (parseInt(total) >= maxMajoredHours) {
+        majoredHours = maxAuthorizedMajoredHours;
       } else {
         majoredHours = (Math.abs(parseInt(total) - minMajoredHours) + 1).toString();
       }
